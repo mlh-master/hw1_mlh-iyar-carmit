@@ -19,7 +19,7 @@ def rm_ext_and_nan(CTG_features, extra_feature):
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
     c_ctg = CTG_features.copy()
     del c_ctg[extra_feature]
-   
+    c_ctg = pd.to_numeric(c_ctg, errors='coerce')
     c_ctg = c_ctg.fillna(1000)
     # --------------------------------------------------------------------------
     return c_ctg
@@ -34,7 +34,11 @@ def nan2num_samp(CTG_features, extra_feature):
     """
     c_cdf = {}
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
-
+    c_cdf = CTG_features.copy()
+    del c_cdf[extra_feature]
+    c_cdf = pd.to_numeric(c_cdf, errors='coerce')
+    for i in range(len(c_cdf)):
+        c_cdf.loc[:][i] = c_cdf.loc[:][i].fillna(np.random.choice(c_cdf.loc[:][i]))
     # -------------------------------------------------------------------------
     return pd.DataFrame(c_cdf)
 
