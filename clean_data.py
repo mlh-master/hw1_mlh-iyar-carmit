@@ -18,8 +18,9 @@ def rm_ext_and_nan(CTG_features, extra_feature):
     """
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
     c_ctg = CTG_features.copy()
-    del c_ctg[extra_feature] 
-     
+    del c_ctg[extra_feature]
+   
+    c_ctg = c_ctg.fillna(1000)
     # --------------------------------------------------------------------------
     return c_ctg
 
