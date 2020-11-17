@@ -17,7 +17,9 @@ def rm_ext_and_nan(CTG_features, extra_feature):
     :return: A dictionary of clean CTG called c_ctg
     """
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
-
+    c_ctg = CTG_features.copy()
+    del c_ctg[extra_feature] 
+     
     # --------------------------------------------------------------------------
     return c_ctg
 
