@@ -19,8 +19,9 @@ def rm_ext_and_nan(CTG_features, extra_feature):
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
     c_ctg = CTG_features.copy()
     del c_ctg[extra_feature]
-    c_ctg = pd.to_numeric(c_ctg, errors='coerce')
+    c_ctg = c_ctg.apply(pd.to_numeric, errors='coerce')
     c_ctg = c_ctg.fillna(1000)
+    #df_na = c_ctg.dropna()
     # --------------------------------------------------------------------------
     return c_ctg
 
@@ -34,11 +35,24 @@ def nan2num_samp(CTG_features, extra_feature):
     """
     c_cdf = {}
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
-    c_cdf = CTG_features.copy()
-    del c_cdf[extra_feature]
-    c_cdf = pd.to_numeric(c_cdf, errors='coerce')
-    for i in range(len(c_cdf)):
-        c_cdf.loc[:][i] = c_cdf.loc[:][i].fillna(np.random.choice(c_cdf.loc[:][i]))
+    c_cdf_1 = CTG_features.to_dict()
+    del c_cdf_1[extra_feature]
+    c_cdf_1 = c_cdf_1.apply(pd.to_numeric, errors='coerce')
+
+
+   for col in c_cdf_1:
+        not_nan_values = c_cdf_1[~np.isnan(c_cdf_1[col])]
+        rows = len(np.isnan(c_cdf_1[col]))
+        c_cdf_1[col] =  {k: np.random.choice(not_nan_values,1) for k in c_cdf_1[col] if np.isnan(c_cdf_1[col])}
+    # random_val = pd.CTG_features(val, columns=c_cdf_1.columns, index=c_cdf_1.index)
+    c_cdf = c_cdf.update(c_cdf_1)
+
+    #############################
+    #c_cdf = CTG_features.copy()
+    #del c_cdf[extra_feature]
+    #c_cdf = pd.to_numeric(c_cdf, errors='coerce')
+    #for i in range(len(c_cdf)):
+     #   c_cdf.loc[:][i] = c_cdf.loc[:][i].fillna(np.random.choice(c_cdf.loc[:][i]))
     # -------------------------------------------------------------------------
     return pd.DataFrame(c_cdf)
 
