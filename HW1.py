@@ -245,8 +245,8 @@ plt.show()
 
 from clean_data import phys_prior as phpr
 
-feature = 'LB' # change this feature
-thresh = 500 # FHR cannot be more then 500 bpm. Change this threshold accordingly to the feature
+feature = 'FM' # Fetal Movement
+thresh = 1000 # FM cannot be more then 1000 per day. it doesn't make sense.
 filt_feature = phpr(c_samp, feature, thresh)
 
 

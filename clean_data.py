@@ -35,25 +35,18 @@ def nan2num_samp(CTG_features, extra_feature):
     """
     c_cdf = {}
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
-    c_cdf_1 = CTG_features.to_dict()
-    del c_cdf_1[extra_feature]
-    c_cdf_1 = c_cdf_1.apply(pd.to_numeric, errors='coerce')
+    CTG_features = CTG_features.apply(pd.to_numeric, errors='coerce')
+    c_cdf = CTG_features.to_dict()
+    del c_cdf[extra_feature]
+
+    for col in c_cdf:
+        vals = np.fromiter(c_cdf[col].values(), dtype=float)
+        not_nan_values = vals[~np.isnan(vals)]
+        new_col_vals =  [np.random.choice(not_nan_values) if np.isnan(k) else k for k in vals ]
+        c_cdf[col] = new_col_vals
 
 
-   for col in c_cdf_1:
-        not_nan_values = c_cdf_1[~np.isnan(c_cdf_1[col])]
-        rows = len(np.isnan(c_cdf_1[col]))
-        c_cdf_1[col] =  {k: np.random.choice(not_nan_values,1) for k in c_cdf_1[col] if np.isnan(c_cdf_1[col])}
-    # random_val = pd.CTG_features(val, columns=c_cdf_1.columns, index=c_cdf_1.index)
-    c_cdf = c_cdf.update(c_cdf_1)
-
-    #############################
-    #c_cdf = CTG_features.copy()
-    #del c_cdf[extra_feature]
-    #c_cdf = pd.to_numeric(c_cdf, errors='coerce')
-    #for i in range(len(c_cdf)):
-     #   c_cdf.loc[:][i] = c_cdf.loc[:][i].fillna(np.random.choice(c_cdf.loc[:][i]))
-    # -------------------------------------------------------------------------
+  # -------------------------------------------------------------------------
     return pd.DataFrame(c_cdf)
 
 
@@ -64,7 +57,10 @@ def sum_stat(c_feat):
     :return: Summary statistics as a dicionary of dictionaries (called d_summary) as explained in the notebook
     """
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
-
+    d_summary = {}
+    for col in c_feat:
+        describe = c_feat[col].describe()
+        d_summary[col] = {'min':describe['min'],'Q1':describe['25%'],'median':describe['50%'],'Q3':describe['75%'],'max':describe['max']}
     # -------------------------------------------------------------------------
     return d_summary
 
@@ -78,6 +74,17 @@ def rm_outlier(c_feat, d_summary):
     """
     c_no_outlier = {}
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
+    for col in d_summary:
+        Q3 = d_summary[col]['Q3']
+        Q1 = d_summary[col]['Q1']
+        IQR = Q3 - Q1
+        LEFT = Q1 - 1.5*IQR
+        RIGHT = Q3 + 1.5*IQR
+        arr = np.array(c_feat[col])
+        c_no_outlier[col] = arr[(arr>LEFT) & (arr<RIGHT)]
+
+    c_no_outlier = pd.DataFrame.from_dict(c_no_outlier, orient='index')
+    c_no_outlier = c_no_outlier.transpose()
 
     # -------------------------------------------------------------------------
     return pd.DataFrame(c_no_outlier)
@@ -92,7 +99,7 @@ def phys_prior(c_cdf, feature, thresh):
     :return: An array of the "filtered" feature called filt_feature
     """
     # ------------------ IMPLEMENT YOUR CODE HERE:-----------------------------
-
+    filt_feature = c_cdf[feature]<thresh
     # -------------------------------------------------------------------------
     return filt_feature
 
