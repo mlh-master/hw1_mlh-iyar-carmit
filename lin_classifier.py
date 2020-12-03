@@ -19,7 +19,12 @@ def pred_log(logreg, X_train, y_train, X_test, flag=False):
     :return: A two elements tuple containing the predictions and the weightning matrix
     """
     # ------------------ IMPLEMENT YOUR CODE HERE:-----------------------------
-
+    logreg.fit(X_train, y_train)
+    y_pred_log = logreg.predict(X_test)
+    w_log = logreg.coef_
+    
+    if flag==True:
+        y_pred_log = logreg.predict_proba(X_test)
     # -------------------------------------------------------------------------
     return y_pred_log, w_log
 
@@ -73,6 +78,7 @@ def cv_kfold(X, y, C, penalty, K, mode):
     :param mode: Mode of normalization (parameter of norm_standard function in clean_data module)
     :return: A dictionary as explained in the notebook
     """
+    
     kf = SKFold(n_splits=K)
     validation_dict = []
     for c in C:
@@ -83,7 +89,15 @@ def cv_kfold(X, y, C, penalty, K, mode):
             for train_idx, val_idx in kf.split(X, y):
                 x_train, x_val = X.iloc[train_idx], X.iloc[val_idx]
         # ------------------ IMPLEMENT YOUR CODE HERE:-----------------------------
-
+                y_train, y_val = y[train_idx], y[val_idx]
+                [y_pred,w] = pred_log(logreg, x_train, y_train, x_val, flag=False)
+                [y_pred_probs,w] = pred_log(logreg, x_train, y_train, x_val, flag=True)
+                if k == 0:
+                    loss = [log_loss(y_pred,y_pred_probs)]
+                else:
+                    loss.append(log_loss(y_pred,y_pred_probs))
+                k+=1
+            validation_dict.append({'p':p,'C':c,'mu':np.mean(loss),'sigma':np.std(loss)})
         # --------------------------------------------------------------------------
     return validation_dict
 
@@ -98,7 +112,14 @@ def odds_ratio(w, X, selected_feat='LB'):
              odds_ratio: the odds ratio of the selected feature and label
     """
     # ------------------ IMPLEMENT YOUR CODE HERE:-----------------------------
+    w_vec = w[0][:]
+    z = w_vec @ np.transpose(X)
+    odds_vec = 1 / (np.exp(-z))
+    odds = np.median(odds_vec)
 
+    feature_idx = X.columns.get_loc(selected_feat)
+    w_1 = np.array(w[0][feature_idx])
+    odd_ratio = np.exp(w_1)
     # --------------------------------------------------------------------------
 
     return odds, odd_ratio

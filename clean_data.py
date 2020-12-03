@@ -20,8 +20,7 @@ def rm_ext_and_nan(CTG_features, extra_feature):
     c_ctg = CTG_features.copy()
     del c_ctg[extra_feature]
     c_ctg = c_ctg.apply(pd.to_numeric, errors='coerce')
-    c_ctg = c_ctg.fillna(1000)
-    #df_na = c_ctg.dropna()
+    c_ctg = c_ctg.dropna()
     # --------------------------------------------------------------------------
     return c_ctg
 
@@ -42,7 +41,7 @@ def nan2num_samp(CTG_features, extra_feature):
     for col in c_cdf:
         vals = np.fromiter(c_cdf[col].values(), dtype=float)
         not_nan_values = vals[~np.isnan(vals)]
-        new_col_vals =  [np.random.choice(not_nan_values) if np.isnan(k) else k for k in vals ]
+        new_col_vals =[np.random.choice(not_nan_values) if np.isnan(k) else k for k in vals]
         c_cdf[col] = new_col_vals
 
 
@@ -99,7 +98,10 @@ def phys_prior(c_cdf, feature, thresh):
     :return: An array of the "filtered" feature called filt_feature
     """
     # ------------------ IMPLEMENT YOUR CODE HERE:-----------------------------
-    filt_feature = c_cdf[feature]<thresh
+    try:
+        filt_feature = thresh[0] < c_cdf[feature] < thresh[1]
+    except:
+        filt_feature = c_cdf[feature] < thresh
     # -------------------------------------------------------------------------
     return filt_feature
 
@@ -115,6 +117,26 @@ def norm_standard(CTG_features, selected_feat=('LB', 'ASTV'), mode='none', flag=
     """
     x, y = selected_feat
     # ------------------ IMPLEMENT YOUR CODE HERE:------------------------------
+    if mode == 'standard':
+        nsd_res = (CTG_features - CTG_features.mean()) / CTG_features.std()
+    elif mode == 'MinMax':
+        nsd_res = (CTG_features - CTG_features.min()) / (CTG_features.max() - CTG_features.min())
+    elif mode == 'mean':
+        nsd_res = (CTG_features - CTG_features.mean()) / (CTG_features.max() - CTG_features.min())
+    else:
+        nsd_res = CTG_features
+    if flag == True:
+        if mode != "none":
+            CTG_features.hist(column=[x,y], bins = 100 ,layout = (1,2),figsize=(20, 10),label = 'none ' + mode, color = '#0504aa')
+            plt.xlabel('value')
+            plt.ylabel('Count')
+            plt.legend(loc = "upper right")
 
+        plt.figure()
+        nsd_res.hist(column=[x,y], bins=100, figsize=(20, 10),layout = (1,2), label = mode)
+        plt.xlabel('value')
+        plt.ylabel('Count')
+        plt.legend(loc="upper right")
+        plt.show()
     # -------------------------------------------------------------------------
     return pd.DataFrame(nsd_res)
