@@ -98,10 +98,7 @@ def phys_prior(c_cdf, feature, thresh):
     :return: An array of the "filtered" feature called filt_feature
     """
     # ------------------ IMPLEMENT YOUR CODE HERE:-----------------------------
-    try:
-        filt_feature = thresh[0] < c_cdf[feature] < thresh[1]
-    except:
-        filt_feature = c_cdf[feature] < thresh
+    filt_feature = c_cdf[feature] < thresh
     # -------------------------------------------------------------------------
     return filt_feature
 

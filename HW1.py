@@ -400,10 +400,12 @@ selected_feat = 'LB'
 #
 #
 # # Implement your code here:
-# mode = # choose a mode from the `nsd`
-# y_pred, w_norm_std = pred_log(logreg,) # complete this function using nsd function
-# print("Accuracy is: " + str("{0:.2f}".format(100 * metrics.accuracy_score(y_test, y_pred))) + "%")
-# print("F1 score is: " + str("{0:.2f}".format(100 * metrics.f1_score(y_test, y_pred, average='macro'))) + "%")
+mode = 'MinMax'# choose a mode from the `nsd`
+X_train_norm = nsd(X_train, selected_feat, mode, flag=False)
+X_test_norm = nsd(X_test, selected_feat, mode, flag=False)
+y_pred, w_norm_std = pred_log(logreg, X_train_norm, y_train, X_test_norm, flag=False) # complete this function using nsd function
+print("Accuracy is: " + str("{0:.2f}".format(100 * metrics.accuracy_score(y_test, y_pred))) + "%")
+print("F1 score is: " + str("{0:.2f}".format(100 * metrics.f1_score(y_test, y_pred, average='macro'))) + "%")
 #
 #
 # # You can choose now one of the training-testing dataset and stick to it. Let's visualize our learned parameters. Use your chosen weight matrix as an input to the function `w_no_p_table` in the next cell.
@@ -411,8 +413,8 @@ selected_feat = 'LB'
 # # In[ ]:
 #
 #
-# input_mat =  # Fill this argument
-# w_no_p_table(input_mat,orig_feat)
+input_mat = w_norm_std # Fill this argument
+w_no_p_table(input_mat,orig_feat)
 #
 #
 # # ### Questions:
@@ -431,11 +433,11 @@ selected_feat = 'LB'
 # # In[ ]:
 #
 #
-# cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
-# ax = plt.subplot()
-# sns.heatmap(cnf_matrix, annot=True, xticklabels=['Normal','Suspect','Pathology'], yticklabels=['Normal','Suspect','Pathology'])
-# ax.set(ylabel='True labels', xlabel='Predicted labels')
-# plt.show()
+cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
+ax = plt.subplot()
+sns.heatmap(cnf_matrix, annot=True, xticklabels=['Normal','Suspect','Pathology'], yticklabels=['Normal','Suspect','Pathology'])
+ax.set(ylabel='True labels', xlabel='Predicted labels')
+plt.show()
 #
 #
 # # ### Questions:
@@ -460,16 +462,18 @@ selected_feat = 'LB'
 #
 #
 # Implement your code here:
-mode = 'MinMax'# choose a mode from the `nsd`
+mode = 'mean'# choose a mode from the `nsd`
 logreg_l2 = LogisticRegression(solver='saga', multi_class='ovr', max_iter=10000,penalty='l2') # complete the arguments for L2
-y_pred_2, w2 = pred_log(logreg_l2, X_train, y_train, X_test, flag=False) # complete this function using nsd function
+X_train_mean = nsd(X_train, selected_feat, mode, flag=False)
+X_test_mean = nsd(X_test, selected_feat, mode, flag=False)
+y_pred_2, w2 = pred_log(logreg_l2, X_train_mean, y_train, X_test_mean, flag=False) # complete this function using nsd function
 cnf_matrix = metrics.confusion_matrix(y_test, y_pred_2)
 ax1 = plt.subplot(211)
 sns.heatmap(cnf_matrix, annot=True, xticklabels=['Normal','Suspect','Pathology'], yticklabels=['Normal','Suspect','Pathology'])
 ax1.set(ylabel='True labels', xlabel='Predicted labels')
 
 logreg_l1 = LogisticRegression(solver='saga', multi_class='ovr', max_iter=10000,penalty='l1') # complete the arguments for L1
-y_pred_1, w1 = pred_log(logreg_l1, X_train, y_train, X_test, flag=False)  # complete this function using nsd function
+y_pred_1, w1 = pred_log(logreg_l1, X_train_mean, y_train, X_test_mean, flag=False)  # complete this function using nsd function
 cnf_matrix = metrics.confusion_matrix(y_test, y_pred_1)
 ax2 = plt.subplot(212)
 sns.heatmap(cnf_matrix, annot=True, xticklabels=['Normal','Suspect','Pathology'], yticklabels=['Normal','Suspect','Pathology'])
@@ -508,8 +512,8 @@ w_all_tbl(w2, w1, orig_feat)
 # In[ ]:
 
 
-C =  [1/0.001, 1/0.01, 1/0.1, 1/1, 1/10, 1/100] # make a list of up to 6 different values of regularization parameters and examine their effects
-K = 5 # choose a number of folds
+C =  np.array([1/0.001, 1/0.01, 1/0.1, 1/1, 1/10, 1/100]) # make a list of up to 6 different values of regularization parameters and examine their effects
+K = 3 # choose a number of folds
 mode = "MinMax" # mode of nsd function
 val_dict = cv_kfold(X_train, y_train, C=C, penalty=['l1', 'l2'], K=K,mode=mode)
 

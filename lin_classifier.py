@@ -67,7 +67,7 @@ def w_all_tbl(w2, w1, orig_feat):
     plt.show()
 
 
-def cv_kfold(X, y, C, penalty, K, mode):
+def cv_kfold(X, y, C, penalty, K,mode):
     """
     
     :param X: Training set samples
@@ -89,15 +89,13 @@ def cv_kfold(X, y, C, penalty, K, mode):
             for train_idx, val_idx in kf.split(X, y):
                 x_train, x_val = X.iloc[train_idx], X.iloc[val_idx]
         # ------------------ IMPLEMENT YOUR CODE HERE:-----------------------------
+                x_train_norm = nsd(x_train,selected_feat=('LB', 'ASTV'), mode=mode, flag=False)
+                x_val_norm =nsd(x_val,selected_feat=('LB', 'ASTV'), mode=mode, flag=False)
                 y_train, y_val = y[train_idx], y[val_idx]
-                [y_pred,w] = pred_log(logreg, x_train, y_train, x_val, flag=False)
-                [y_pred_probs,w] = pred_log(logreg, x_train, y_train, x_val, flag=True)
-                if k == 0:
-                    loss = [log_loss(y_pred,y_pred_probs)]
-                else:
-                    loss.append(log_loss(y_pred,y_pred_probs))
+                [y_pred_probs,w] = pred_log(logreg, x_train_norm, y_train, x_val_norm, flag=True)
+                loss_val_vec[k] = log_loss(y_val,y_pred_probs)
                 k+=1
-            validation_dict.append({'p':p,'C':c,'mu':np.mean(loss),'sigma':np.std(loss)})
+            validation_dict.append({'penalty':p,'C':c,'mu':np.mean(loss_val_vec),'sigma':np.std(loss_val_vec)})
         # --------------------------------------------------------------------------
     return validation_dict
 
